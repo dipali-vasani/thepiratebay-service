@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pirate.helper.ItemDto;
+import com.pirate.helper.PlacesDto;
 import com.pirate.helper.ResponseEntity;
+import com.pirate.helper.ResultDto;
 import com.pirate.service.CommonService;
 
 @RestController
+@RequestMapping("/api")
 public class CommonController {
 
 	/** The Constant LOG. */
@@ -25,10 +27,18 @@ public class CommonController {
 	@Autowired
 	private CommonService commonService;
 
-
-	@RequestMapping(value = "/save/item", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity saveItem(@RequestBody ItemDto itemDto,
-			@RequestParam(value = "loginid") String loginid) {
+	@RequestMapping(value = "/saveitem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity saveItem(@RequestBody ItemDto itemDto) {
 		return commonService.save(itemDto);
+	}
+
+	@RequestMapping(value = "/getplaces", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResultDto getPlaces(@RequestBody PlacesDto placesDto, @RequestParam(value = "itemname") String itemname) {
+		return commonService.getPlaces(placesDto, itemname);
+	}
+
+	@RequestMapping(value = "/getnotification", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResultDto getNotifications(@RequestBody PlacesDto placesDto) {
+		return commonService.getNotifications(placesDto);
 	}
 }

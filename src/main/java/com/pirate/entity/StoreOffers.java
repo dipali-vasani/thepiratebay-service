@@ -24,12 +24,16 @@ public class StoreOffers implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 
+	private String itemName;
+
 	private String brand;
 
 	private String placeID;
 
 	private int discount;
-	
+
 	private String type;
+
+	private int revenue;
 
 }

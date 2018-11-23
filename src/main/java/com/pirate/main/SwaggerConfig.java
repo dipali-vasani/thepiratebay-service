@@ -1,4 +1,5 @@
 package com.pirate.main;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,9 +30,8 @@ public class SwaggerConfig {
 	 */
 	@Bean
 	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2).select()
-				.apis(RequestHandlerSelectors.basePackage("com.pirate.controller")).paths(PathSelectors.any())
-				.build().apiInfo(apiInfo());
+		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
+				.paths(PathSelectors.any()).build().apiInfo(apiInfo());
 	}
 
 	/**
@@ -40,6 +40,6 @@ public class SwaggerConfig {
 	 * @return the api info
 	 */
 	private ApiInfo apiInfo() {
-		return new ApiInfoBuilder().title("MS RCA API").version(version).license(null).build();
+		return new ApiInfoBuilder().title("WishKeeperAPI").version(version).license(null).build();
 	}
 }
