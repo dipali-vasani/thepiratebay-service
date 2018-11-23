@@ -22,7 +22,8 @@ import se.walkercrou.places.Place;
 public class Main {
 
 	public static void main(String args[]) throws ApiException, InterruptedException, IOException {
-		ApiKey key = new ApiKey("");
+		String apikey = System.getenv("apikey");
+		ApiKey key = new ApiKey(apikey);
 		// GeocodingResult[] results = getResults(key, "1600 Amphitheatre Parkway
 		// Mountain View, CA 94043");
 
