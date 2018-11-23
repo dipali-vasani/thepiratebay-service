@@ -24,7 +24,7 @@ public class WishList implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 
-	private int userid;
+	private String userid;
 
 	private String itemName;
 
