@@ -1,5 +1,7 @@
 package com.pirate.helper;
 
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,8 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 public class RequestEntity {
-	/** The data. */
-	Object data;
+
+	String instanceId;
+	
+	Map<String, Map<String, String>> payload;
 }

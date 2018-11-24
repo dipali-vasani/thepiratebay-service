@@ -29,16 +29,25 @@ public class CommonController {
 
 	@RequestMapping(value = "/saveitem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity saveItem(@RequestBody ItemDto itemDto) {
+		LOG.info("/saveitem");
 		return commonService.save(itemDto);
+	}
+
+	@RequestMapping(value = "/getwishlist", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity getwishlist(@RequestParam(value = "userid") String userid) {
+		LOG.info("/getwishlist");
+		return commonService.getwishlist(userid);
 	}
 
 	@RequestMapping(value = "/getplaces", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResultDto getPlaces(@RequestBody PlacesDto placesDto, @RequestParam(value = "itemname") String itemname) {
+		LOG.info("/getplaces");
 		return commonService.getPlaces(placesDto, itemname);
 	}
 
 	@RequestMapping(value = "/getnotification", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResultDto getNotifications(@RequestBody PlacesDto placesDto) {
+		LOG.info("/getnotification");
 		return commonService.getNotifications(placesDto);
 	}
 }

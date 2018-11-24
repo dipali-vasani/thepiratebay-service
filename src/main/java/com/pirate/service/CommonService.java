@@ -13,5 +13,7 @@ public interface CommonService {
 
 	ResultDto getNotifications(PlacesDto placesDto);
 
+	ResponseEntity getwishlist(String userid);
+
 
 }

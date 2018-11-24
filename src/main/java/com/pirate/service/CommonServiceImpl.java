@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import com.pirate.entity.StoreOffers;
 import com.pirate.entity.WishList;
 import com.pirate.helper.ItemDto;
 import com.pirate.helper.PlacesDto;
+import com.pirate.helper.RequestEntity;
 import com.pirate.helper.ResponseEntity;
 import com.pirate.helper.ResultDto;
 import com.pirate.repository.ItemTypeMappingRepository;
@@ -40,7 +42,7 @@ public class CommonServiceImpl implements CommonService {
 	/** The Constant LOG. */
 	private static final Logger LOG = LoggerFactory.getLogger(CommonServiceImpl.class);
 
-	private static String URL = "";
+	private static String URL = "https://api.cortex.insights.ai/v3/agents/";
 
 	@Autowired
 	private WishListRepository wishListRepository;
@@ -118,19 +120,29 @@ public class CommonServiceImpl implements CommonService {
 		try {
 			List<PlacesSearchResult> places = new ArrayList<>();
 			List<StoreOffers> offers = new ArrayList<>();
-			Map<String, Map<String, Map<String, String>>> payload = new HashMap<>();
+			RequestEntity req = new RequestEntity();
 			Map<String, String> user = new HashMap<>();
 			Map<String, Map<String, String>> testdata = new HashMap<>();
 			user.put("user", placesDto.getUserid());
 			testdata.put("test_data", user);
-			payload.put("payload", testdata);
+			req.setInstanceId("5bf8bf079b9de0677dcca244");
+			req.setPayload(testdata);
 			ObjectMapper mapper = new ObjectMapper();
-			mapper.writeValueAsString(payload);
-			String itemIds = HttpClientWrapper.doRawPost(URL, payload);
-			if (itemIds != null) {
-				JSONArray jsonArray = new JSONArray(itemIds);
+			System.out.println(mapper.writeValueAsString(req));
+
+			String responsePost = HttpClientWrapper.doRawPost(URL + "default/store-recommendations/services/recommend",
+					req);
+			System.out.println(responsePost);
+			JSONObject jsonObject = new JSONObject(responsePost);
+			String responseGet = HttpClientWrapper
+					.doRawGet(URL + "services/activations/" + jsonObject.get("activationId"));
+			System.out.println(responseGet);
+			if (responseGet != null) {
+				JSONObject json = new JSONObject(responseGet);
+				JSONObject responseObj = ((JSONObject) json.get("activation")).getJSONObject("response");
+				JSONArray jsonArray = responseObj.getJSONArray("items");
 				for (int i = 0; i < jsonArray.length(); i++) {
-					int id = Integer.parseInt(jsonArray.getString(i));
+					int id = jsonArray.getInt(i);
 					Optional<PurchaseHistory> history = purchaseHistoryRepository.findById(id);
 					if (history.isPresent()) {
 						Optional<WishList> wishlist = wishListRepository.findByUseridAndItemNameAndIsDeleted(
@@ -150,6 +162,14 @@ public class CommonServiceImpl implements CommonService {
 			e.printStackTrace();
 		}
 		return resultDto;
+	}
+
+	@Override
+	public ResponseEntity getwishlist(String userid) {
+		ResponseEntity result = new ResponseEntity();
+		result.setStatusCode(HttpStatus.OK.value());
+		result.setData(wishListRepository.findByUseridAndIsDeleted(userid, false));
+		return result;
 	}
 
 }
