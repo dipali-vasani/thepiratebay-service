@@ -12,6 +12,8 @@ import com.pirate.entity.WishList;
 public interface WishListRepository extends CrudRepository<WishList, Integer> {
 
 	List<WishList> findByIsDeleted(Boolean isDeleted);
+	
+	List<WishList> findByUseridAndIsDeleted(String userid, Boolean isDeleted);
 
 	Optional<WishList> findByUseridAndItemName(String userid, String itemName);
 

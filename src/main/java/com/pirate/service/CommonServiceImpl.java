@@ -58,12 +58,19 @@ public class CommonServiceImpl implements CommonService {
 	public ResponseEntity save(ItemDto itemDto) {
 		ResponseEntity result = new ResponseEntity();
 		result.setStatusCode(HttpStatus.OK.value());
-		WishList entity = new WishList();
-		entity.setItemName(itemDto.getItemName());
-		entity.setUserid(itemDto.getUserid());
-		entity.setIsDeleted(itemDto.getIsDone());
-		wishListRepository.save(entity);
-		result.setData(wishListRepository.findByIsDeleted(false));
+		Optional<WishList> entity = wishListRepository.findByUseridAndItemName(itemDto.getUserid(),
+				itemDto.getItemName());
+		WishList wishList = new WishList();
+		if (entity.isPresent()) {
+			wishList = entity.get();
+			wishList.setIsDeleted(itemDto.getIsDone());
+		} else {
+			wishList.setItemName(itemDto.getItemName());
+			wishList.setUserid(itemDto.getUserid());
+			wishList.setIsDeleted(itemDto.getIsDone());
+		}
+		wishListRepository.save(wishList);
+		result.setData(wishListRepository.findByUseridAndIsDeleted(itemDto.getUserid(), false));
 		return result;
 	}
 
