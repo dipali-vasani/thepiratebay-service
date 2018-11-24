@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.PlaceDetails;
 import com.google.maps.model.PlacesSearchResult;
@@ -83,6 +82,11 @@ public class CommonServiceImpl implements CommonService {
 		try {
 			resultDto.setPlaces(findPlaces(placesDto, itemname));
 			resultDto.setAds(storeOffersRepository.findByItemNameOrderByRevenue(itemname));
+			List<PlaceDetails> ad_details = new ArrayList<>();
+			for (StoreOffers offer : resultDto.getAds()) {
+				ad_details.add(PlaceApi.getPlace(offer.getPlaceID()));
+			}
+			resultDto.setAd_details(ad_details);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -128,16 +132,12 @@ public class CommonServiceImpl implements CommonService {
 			testdata.put("test_data", user);
 			req.setInstanceId("5bf8bf079b9de0677dcca244");
 			req.setPayload(testdata);
-			ObjectMapper mapper = new ObjectMapper();
-			System.out.println(mapper.writeValueAsString(req));
 
 			String responsePost = HttpClientWrapper.doRawPost(URL + "default/store-recommendations/services/recommend",
 					req);
-			System.out.println(responsePost);
 			JSONObject jsonObject = new JSONObject(responsePost);
 			String responseGet = HttpClientWrapper
 					.doRawGet(URL + "services/activations/" + jsonObject.get("activationId"));
-			System.out.println(responseGet);
 			if (responseGet != null) {
 				JSONObject json = new JSONObject(responseGet);
 				JSONObject responseObj = ((JSONObject) json.get("activation")).getJSONObject("response");
