@@ -6,6 +6,7 @@ import com.google.maps.NearbySearchRequest;
 import com.google.maps.PlacesApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.LatLng;
+import com.google.maps.model.PlaceDetails;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResponse;
 import com.google.maps.model.PlacesSearchResult;
@@ -32,6 +33,10 @@ public class PlaceApi {
 			req = nearbySearchRequest.await();
 		}
 		return req.results;
+	}
+
+	public static PlaceDetails getPlace(String placeid) throws ApiException, InterruptedException, IOException {
+		return PlacesApi.placeDetails(key.context(), placeid).await();
 	}
 
 }

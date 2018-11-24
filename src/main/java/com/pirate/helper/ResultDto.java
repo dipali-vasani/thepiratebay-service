@@ -2,6 +2,7 @@ package com.pirate.helper;
 
 import java.util.List;
 
+import com.google.maps.model.PlaceDetails;
 import com.google.maps.model.PlacesSearchResult;
 import com.pirate.entity.StoreOffers;
 
@@ -12,4 +13,5 @@ public class ResultDto {
 
 	PlacesSearchResult[] places;
 	List<StoreOffers> ads;
+	List<PlaceDetails> ad_details;
 }

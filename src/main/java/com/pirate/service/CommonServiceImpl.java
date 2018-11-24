@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.maps.errors.ApiException;
+import com.google.maps.model.PlaceDetails;
 import com.google.maps.model.PlacesSearchResult;
 import com.pirate.entity.ItemTypeMapping;
 import com.pirate.entity.PurchaseHistory;
@@ -146,7 +147,7 @@ public class CommonServiceImpl implements CommonService {
 					Optional<PurchaseHistory> history = purchaseHistoryRepository.findById(id);
 					if (history.isPresent()) {
 						Optional<WishList> wishlist = wishListRepository.findByUseridAndItemNameAndIsDeleted(
-								history.get().getUserid(), history.get().getItemName(), false);
+								placesDto.getUserid(), history.get().getItemName(), false);
 						if (wishlist.isPresent()) {
 							places.addAll(Arrays.asList(findPlaces(placesDto, wishlist.get().getItemName())));
 							offers.addAll(storeOffersRepository.findByItemNameAndBrandOrderByRevenue(
@@ -155,6 +156,11 @@ public class CommonServiceImpl implements CommonService {
 					}
 				}
 			}
+			List<PlaceDetails> ad_details = new ArrayList<>();
+			for (StoreOffers offer : offers) {
+				ad_details.add(PlaceApi.getPlace(offer.getPlaceID()));
+			}
+			resultDto.setAd_details(ad_details);
 			resultDto.setAds(offers);
 			PlacesSearchResult[] a = new PlacesSearchResult[places.size()];
 			resultDto.setPlaces(places.toArray(a));
