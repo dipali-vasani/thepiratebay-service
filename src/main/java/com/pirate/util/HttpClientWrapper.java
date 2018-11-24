@@ -70,11 +70,11 @@ public class HttpClientWrapper {
 	 *            the login id
 	 * @return the string
 	 */
-	public static String doRawPost(String url, Object data, String loginId) {
+	public static String doRawPost(String url, Object data) {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			CloseableHttpClient client = HttpClientBuilder.create().build();
-			HttpPost request = new HttpPost(url + "?loginid=" + loginId);
+			HttpPost request = new HttpPost(url);
 			StringEntity postingString = new StringEntity(mapper.writeValueAsString(data));
 			request.setEntity(postingString);
 			request.setHeader("Content-type", "application/json");

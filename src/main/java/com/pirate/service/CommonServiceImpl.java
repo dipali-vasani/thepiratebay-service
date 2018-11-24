@@ -3,18 +3,25 @@ package com.pirate.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.PlacesSearchResult;
 import com.pirate.entity.ItemTypeMapping;
+import com.pirate.entity.PurchaseHistory;
+import com.pirate.entity.StoreOffers;
 import com.pirate.entity.WishList;
 import com.pirate.helper.ItemDto;
 import com.pirate.helper.PlacesDto;
@@ -24,6 +31,7 @@ import com.pirate.repository.ItemTypeMappingRepository;
 import com.pirate.repository.PurchaseHistoryRepository;
 import com.pirate.repository.StoreOffersRepository;
 import com.pirate.repository.WishListRepository;
+import com.pirate.util.HttpClientWrapper;
 import com.pirate.util.PlaceApi;
 
 @Service
@@ -32,17 +40,19 @@ public class CommonServiceImpl implements CommonService {
 	/** The Constant LOG. */
 	private static final Logger LOG = LoggerFactory.getLogger(CommonServiceImpl.class);
 
-	@Autowired
-	WishListRepository wishListRepository;
+	private static String URL = "";
 
 	@Autowired
-	StoreOffersRepository storeOffersRepository;
+	private WishListRepository wishListRepository;
 
 	@Autowired
-	PurchaseHistoryRepository purchaseHistoryRepository;
+	private StoreOffersRepository storeOffersRepository;
 
 	@Autowired
-	ItemTypeMappingRepository itemTypeMappingRepository;
+	private PurchaseHistoryRepository purchaseHistoryRepository;
+
+	@Autowired
+	private ItemTypeMappingRepository itemTypeMappingRepository;
 
 	@Override
 	public ResponseEntity save(ItemDto itemDto) {
@@ -99,19 +109,39 @@ public class CommonServiceImpl implements CommonService {
 	public ResultDto getNotifications(PlacesDto placesDto) {
 		ResultDto resultDto = new ResultDto();
 		try {
-			List<WishList> result = wishListRepository.findByIsDeleted(false);
 			List<PlacesSearchResult> places = new ArrayList<>();
-			for (WishList wish : result) {
-				places.addAll(Arrays.asList(findPlaces(placesDto, wish.getItemName())));
+			List<StoreOffers> offers = new ArrayList<>();
+			Map<String, Map<String, Map<String, String>>> payload = new HashMap<>();
+			Map<String, String> user = new HashMap<>();
+			Map<String, Map<String, String>> testdata = new HashMap<>();
+			user.put("user", placesDto.getUserid());
+			testdata.put("test_data", user);
+			payload.put("payload", testdata);
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.writeValueAsString(payload);
+			String itemIds = HttpClientWrapper.doRawPost(URL, payload);
+			if (itemIds != null) {
+				JSONArray jsonArray = new JSONArray(itemIds);
+				for (int i = 0; i < jsonArray.length(); i++) {
+					int id = Integer.parseInt(jsonArray.getString(i));
+					Optional<PurchaseHistory> history = purchaseHistoryRepository.findById(id);
+					if (history.isPresent()) {
+						Optional<WishList> wishlist = wishListRepository.findByUseridAndItemNameAndIsDeleted(
+								history.get().getUserid(), history.get().getItemName(), false);
+						if (wishlist.isPresent()) {
+							places.addAll(Arrays.asList(findPlaces(placesDto, wishlist.get().getItemName())));
+							offers.addAll(storeOffersRepository.findByItemNameAndBrandOrderByRevenue(
+									history.get().getItemName(), history.get().getBrand()));
+						}
+					}
+				}
 			}
+			resultDto.setAds(offers);
 			PlacesSearchResult[] a = new PlacesSearchResult[places.size()];
 			resultDto.setPlaces(places.toArray(a));
-		} catch (ApiException | InterruptedException | IOException e) {
+		} catch (ApiException | InterruptedException | IOException | JSONException e) {
 			e.printStackTrace();
 		}
-		// List<StoreOffers> offers =
-		// storeOffersRepository.findByItemNameAndBrandOrderByRevenue(itemname, brand);
-		// resultDto.setAds(offers);
 		return resultDto;
 	}
 
